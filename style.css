@@ -1,86 +1,67 @@
-* {
+*{
     margin: 0;
     padding: 0;
 }
 
-#navbar {
+#navbar{
     display: flex;
     justify-content: space-between;
     padding: 15px;
     background-color: black;
-    color: aliceblue;
-}
-
-#dropdown-cart {
-    position: absolute;
-    z-index: 5;
-    width: 250px;
-    top: 35px;
-    right: 0px;
-    border: 1px solid black;
-    color: #000;
-    background-color: aqua;
-    display: none;
-}
-
-#dropdown-cart .cart-item>img {
-    width: 80px;
-    height: 80px;
-}
-#dropdown-cart .cart-item{
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    margin-top: 10px;
-}
-
-
-
-
-.products {
-    padding: 20px;
-    display: flex;
-    column-gap: 10px;
-    justify-content: center;
-}
-
-.card {
-    width: 45%;
-}
-
-img {
-    max-width: 100%;
-}
-
-button {
-    border: none;
-    padding: 5px;
-    background-color: blue;
-    border-radius: 4px;
-    font-weight: 700;
-    width: max-content;
     color: white;
 }
+.cartImage{
+    width: 40px;
+    height: 40px;
+}
 
-.cart {
+.products{
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    column-gap: 10px;
+}
+.card{
+    width: 30%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+
+
+button{
+    border: none;
+    border-radius: 4px;
+    padding: 5px;
+    background-color: blue;
+    color: white;
+    font-weight: 700;
+    width: max-content;
+    cursor: pointer;
+}
+
+.cart{
     position: relative;
     cursor: pointer;
 }
 
-#delete-all-button {
-    margin: 10px 0 0 40%;
-    padding: 8px 15px;
-    background-color: red;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s;
+#dropdown-cart{
+opacity: 0;
+position: absolute;
+right: 0;
+top: 34px;
+width: 250px;
+border: 1px solid black;
+z-index: 5;
+padding: 10px;
+background-color: aqua;
+color: black;
+transition: .8s;
+
 
 }
-.cart-total{
-    margin-left: 40%;
-}
-#delete-all-button:hover {
-    background-color: darkred;
+
+.cart:hover #dropdown-cart{
+  opacity: 1;
 }

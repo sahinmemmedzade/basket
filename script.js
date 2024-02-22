@@ -1,85 +1,264 @@
-let cart = [];
+document.addEventListener("DOMContentLoaded",function(params) {
+    document.getElementById("go-to-checkout").addEventListener("click",()=>{
+        window.location.href="./checkout.html"
+    })
+    const addToCartButton=document.querySelectorAll(".add-to-cart")
 
-const cartItems = document.getElementById('cart-items');
-const totalPrice = document.getElementById('total-price');
-const cartCount = document.getElementById('card-count');
+    const deleteAll=document.getElementById("delete-all")
 
-if (localStorage.getItem('cart')) {
-    cart = JSON.parse(localStorage.getItem('cart'));
-    updateCart();
-}
+    deleteAll.addEventListener("click",()=>{
+        localStorage.removeItem("sebet")
+        const cartItems=document.getElementById("cart-items")
+        cartItems.innerText="Empty"
+        document.getElementById("total-price").innerText="0"
+        UpdateCartCount()
+    })
 
-function updateCart() {
-    cartItems.innerHTML = '';
-    let total = 0;
-    let uniqueItems = new Set(cart.map(item => item.id));
-    let totalItems = cart.length;
-    cartCount.textContent = `${uniqueItems.size} (${totalItems})`;
+    
 
-    cart.forEach(item => {
-        const div = document.createElement('div');
-        div.classList.add('cart-item');
-        div.innerHTML = `
-            <img src="${item.image}" alt="${item.title}" class="cart-item-image">
-            <div class="cart-item-details">
-                <p class="cart-item-title">${item.title}</p>
-                <p class="cart-item-price">$${item.price}</p>
-            </div>
-            <button class="delete-item" data-id="${item.id}"><i class="fa-solid fa-trash"></i></button>
-        `;
-        cartItems.appendChild(div);
-        total += item.price;
-    });
+    addToCartButton.forEach((button)=>{
+        button.addEventListener("click",(e)=>{
+            const card=e.target.closest(".card")
+            console.log(card);
+            const product={
+                id:card.dataset.id,
+                image:card.querySelector("img").src,
+                title:card.querySelector("h3").innerText,
+                price:parseFloat(card.querySelector("p").innerText.replace('$','')),
+                quantity:1
+            }
 
-    totalPrice.textContent = total.toFixed(2);
+            addToCart(product)
+            DisplayCart()
+            
+        })
+    })
 
-    const deleteButtons = document.querySelectorAll('.delete-item');
-    deleteButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            const itemId = button.dataset.id;
-            removeFromCart(itemId);
+    function addToCart(addproduct) {
+        
+        let cart=JSON.parse(localStorage.getItem("sebet")) || [] //eger localda cart varsa getir yoxdursa bos array dondur
+        const existingProductIndex=cart.findIndex((product)=>product.id===addproduct.id)
+
+        if(existingProductIndex > -1){
+            cart[existingProductIndex].quantity+=1
+        }
+        else{
+            cart.push(addproduct)
+        }
+
+        localStorage.setItem("sebet",JSON.stringify(cart))
+        UpdateCartCount()
+       
+    }
+
+    function DisplayCart() {
+        
+        let cart=JSON.parse(localStorage.getItem("sebet")) || []
+
+        const cartItems=document.getElementById("cart-items")
+        cartItems.innerHTML=''
+
+        cart.forEach((product)=>{
+
+           const pro=document.createElement("div")
+           pro.innerHTML=`<div class="cartProduct" data-id=${product.id}><img class="cartImage" src=${product.image} alt="Mercedes"> ${product.title}-${product.quantity} eded -Price: ${(product.quantity*product.price).toFixed(2)} <i class="fa-solid fa-trash delete-product" ></i></div>`
+            cartItems.appendChild(pro)
+        })
+
+        const totalPrice=cart.reduce((toplam,item)=>toplam+(item.price*item.quantity),0)
+        document.getElementById("total-price").textContent=totalPrice.toFixed(2)
+
+
+        const deleteProduct=document.querySelectorAll(".delete-product")
+
+        deleteProduct.forEach(delPro=>{
+        
+            delPro.addEventListener("click",(e)=>{
+                const card=e.target.closest(".cartProduct")
+                console.log(card);
+                const productId=card.dataset.id
+                RemoveProduct(productId)
+                
+            })
+        })
+    }
+
+
+    function RemoveProduct(productID) {
+            const cart=JSON.parse(localStorage.getItem("sebet")) || []
+            const updateCart=cart.filter(item=>item.id !==productID)
+
+            localStorage.setItem("sebet",JSON.stringify(updateCart))
+            UpdateCartCount()
+            DisplayCart()
+
+
+    }
+
+    function UpdateCartCount() {
+        
+        const cart=JSON.parse(localStorage.getItem("sebet")) || []
+
+        const totalCount=cart.reduce((toplam,item)=>toplam+item.quantity,0)
+
+        document.getElementById("cart-count").innerText=totalCount
+    }
+
+    UpdateCartCount()
+    DisplayCart()
+})
+
+document.addEventListener("DOMContentLoaded", function () {
+    function addToWishlist(product) {
+        let wishlist = JSON.parse(localStorage.getItem("wishlist")) || [];
+        wishlist.push(product);
+        localStorage.setItem("wishlist", JSON.stringify(wishlist));
+    }
+
+    function removeFromWishlist(productId) {
+        let wishlist = JSON.parse(localStorage.getItem("wishlist")) || [];
+        wishlist = wishlist.filter((product) => product.id !== productId);
+        localStorage.setItem("wishlist", JSON.stringify(wishlist));
+    }
+
+    function displayWishlist() {
+        const wishlistItems = document.getElementById("wishlist-items");
+        wishlistItems.innerHTML = "";
+        let wishlist = JSON.parse(localStorage.getItem("wishlist")) || [];
+        wishlist.forEach((product) => {
+            const wishlistItem = document.createElement("div");
+            wishlistItem.classList.add("wishlist-item");
+            wishlistItem.setAttribute("data-id", product.id);
+            wishlistItem.innerHTML = `
+                <img src="${product.image}" alt="${product.title}">
+                <div class="wishlist-details">
+                    <h3>${product.title}</h3>
+                    <p>$${product.price.toFixed(2)}</p>
+                    <button class="remove-from-wishlist">Remove from Wishlist</button>
+                    <button class="add-to-cart-wishlist">Add to Cart</button>
+                </div>`;
+            wishlistItems.appendChild(wishlistItem);
+        });
+    }
+
+    function displayCart() {
+        const cartItems = document.getElementById("cart-items");
+        cartItems.innerHTML = ""; 
+        let wishlist = JSON.parse(localStorage.getItem("wishlist")) || [];
+        wishlist.forEach((product) => {
+            const cartItem = document.createElement("div");
+            cartItem.classList.add("cartProduct");
+            cartItem.setAttribute("data-id", product.id);
+            cartItem.innerHTML = `
+                <img class="cartImage" src="${product.image}" alt="${product.title}">
+                ${product.title} - 1 eded - Price: ${product.price.toFixed(2)}
+                <i class="fa-solid fa-trash delete-product"></i>`;
+            cartItems.appendChild(cartItem);
+        });
+    }
+
+    const addToWishlistButtons = document.querySelectorAll(".add-to-wishlist");
+    addToWishlistButtons.forEach((button) => {
+        button.addEventListener("click", (e) => {
+            const card = e.target.closest(".card");
+            const product = {
+                id: card.dataset.id,
+                image: card.querySelector("img").src,
+                title: card.querySelector("h3").innerText,
+                price: parseFloat(card.querySelector("p").innerText.replace('$', '')),
+            };
+            addToWishlist(product);
+            displayWishlist();
         });
     });
-}
 
-function removeFromCart(itemId) {
-    cart = cart.filter(item => item.id !== itemId);
-    localStorage.setItem('cart', JSON.stringify(cart));
-    updateCart();
-}
-
-function addToCart(id, title, price, image) {
-    const item = { id, title, price, image };
-    cart.push(item);
-    localStorage.setItem('cart', JSON.stringify(cart));
-    updateCart();
-}
-
-const addToCartButtons = document.querySelectorAll('.card button');
-addToCartButtons.forEach(button => {
-    button.addEventListener('click', () => {
-        const parentCard = button.closest('.card');
-        const id = parentCard.dataset.id;
-        const title = parentCard.querySelector('h3').textContent;
-        const price = parseFloat(parentCard.querySelector('p').textContent.slice(1));
-        const image = parentCard.querySelector('img').src;
-
-        addToCart(id, title, price, image);
+    document.addEventListener("click", function (e) {
+        if (e.target && e.target.classList.contains("remove-from-wishlist")) {
+            const productId = e.target.closest(".wishlist-item").dataset.id;
+            removeFromWishlist(productId);
+            displayWishlist();
+        }
     });
+
+    function addToCart(addproduct) {
+        let cart = JSON.parse(localStorage.getItem("sebet")) || []; 
+        const existingProductIndex = cart.findIndex((product) => product.id === addproduct.id);
+
+        if (existingProductIndex > -1) {
+            cart[existingProductIndex].quantity += 1;
+        } else {
+            cart.push(addproduct);
+        }
+
+        localStorage.setItem("sebet", JSON.stringify(cart));
+        UpdateCartCount();
+    }
+
+    function RemoveProduct(productID) {
+        const cart = JSON.parse(localStorage.getItem("sebet")) || [];
+        const updateCart = cart.filter((item) => item.id !== productID);
+
+        localStorage.setItem("sebet", JSON.stringify(updateCart));
+        UpdateCartCount();
+        DisplayCart();
+    }
+
+    function UpdateCartCount() {
+        const cart = JSON.parse(localStorage.getItem("sebet")) || [];
+
+        const totalCount = cart.reduce((total, item) => total + item.quantity, 0);
+
+        document.getElementById("cart-count").innerText = totalCount;
+    }
+
+    function DisplayCart() {
+        let cart = JSON.parse(localStorage.getItem("sebet")) || [];
+
+        const cartItems = document.getElementById("cart-items");
+        cartItems.innerHTML = '';
+
+        cart.forEach((product) => {
+            const cartItem = document.createElement("div");
+            cartItem.innerHTML = `
+                <div class="cartProduct" data-id="${product.id}">
+                    <img class="cartImage" src="${product.image}" alt="${product.title}">
+                    ${product.title} - ${product.quantity} eded - Price: ${(product.quantity * product.price).toFixed(2)}
+                    <i class="fa-solid fa-trash delete-product"></i>
+                </div>`;
+            cartItems.appendChild(cartItem);
+        });
+
+        const totalPrice = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+        document.getElementById("total-price").textContent = totalPrice.toFixed(2);
+
+        const deleteProduct = document.querySelectorAll(".delete-product");
+
+        deleteProduct.forEach(delPro => {
+
+            delPro.addEventListener("click", (e) => {
+                const card = e.target.closest(".cartProduct");
+                const productId = card.dataset.id;
+                RemoveProduct(productId);
+            });
+        });
+    }
+
+    document.addEventListener("click", function (e) {
+        if (e.target && e.target.classList.contains("add-to-cart-wishlist")) {
+            const productId = e.target.closest(".wishlist-item").dataset.id;
+            const product = getProductById(productId); 
+            addToCart(product);
+            removeFromWishlist(productId);
+            displayWishlist();
+            displayCart(); 
+        }
+    });
+
+    function getProductById(productId) {
+        const products = JSON.parse(localStorage.getItem("products")) || [];
+        return products.find(product => product.id === productId);
+    }
+
+    UpdateCartCount();
+    DisplayCart();
 });
-
-const cartElement = document.querySelector('.cart');
-cartElement.addEventListener('click', () => {
-    const dropdownCart = document.getElementById('dropdown-cart');
-    dropdownCart.style.display = dropdownCart.style.display === 'block' ? 'none' : 'block';
-});
-
-function deleteAllItems() {
-    cart = []; 
-    localStorage.removeItem('cart'); 
-    updateCart(); 
-    updateDropdownCart(); 
-}
-
-const deleteAllButton = document.getElementById('delete-all-button');
-deleteAllButton.addEventListener('click', deleteAllItems);
